@@ -15,8 +15,20 @@ Installation
 
 Controls
 --------
-Up/Down       Scroll
-Left/Right    Select previous/next link
-Center        Open selected link
-Center with no selected link: URL keyboard
-Back          Previous page, or exit when history is empty
+Up/Down     
+         Scroll
+         
+Left/Right   
+          Select previous/next link
+          
+Center   
+          Open selected link
+          
+Center with no selected link: 
+          URL keyboard
+          
+Back         
+          Previous page, or exit when history is empty
+          
+Shift/Home 
+          exit the app and returns to the main menu 
