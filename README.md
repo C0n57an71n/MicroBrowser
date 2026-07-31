@@ -1,5 +1,5 @@
 # MicroBrowser
-A small browser for Picoware on PicoCalc
+A small web browser for Picoware on PicoCalc
 Installation
 ------------
 1. Copy MicroBrowser.py into the Picoware apps directory on the SD card.
