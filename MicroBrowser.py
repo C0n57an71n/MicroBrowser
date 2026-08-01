@@ -71,3 +71,4 @@ def stop(view_manager) -> None:
 
     from gc import collect
     collect()
+
