@@ -62,3 +62,4 @@ def resolve_url(base, href):
         authority,
         normalize_path(directory + "/" + href)
     )
+
