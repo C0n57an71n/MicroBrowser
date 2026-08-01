@@ -3,15 +3,15 @@ A small web browser for Picoware on PicoCalc
 Installation
 ------------
 Copy the file: MicroBrowser.py 
-into the Picoware apps directory on the SD card
+ - into the Picoware apps directory on the SD card
  
 Copy the files:
-          cache.py
-          config.py
-          htmlparser.py
-          micro_browser_app.py
-          textcodec.py
-          urltools.py
+          - cache.py
+          - config.py
+          - htmlparser.py
+          - micro_browser_app.py
+          - textcodec.py
+          - urltools.py
           
 into a new folder /micro_browser into the existing picoware folder.
  
