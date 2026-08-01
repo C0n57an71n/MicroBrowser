@@ -6,7 +6,7 @@ Copy the file: MicroBrowser.py
  - into the Picoware apps directory on the SD card
  
 Copy the files:
- - cache.py
+ - browser_store.py
  - config.py
  - htmlparser.py
  - micro_browser_app.py
