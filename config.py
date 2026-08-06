@@ -1,21 +1,26 @@
 APP_NAME = "MicroBrowser"
-APP_VERSION = "0.5.0"
+APP_VERSION = "1.0.0"
 
-HOME_URL = "https://frogfind.com/"
+HOME_URL = ""
 USER_AGENT = "MicroBrowser/{} (Picoware; Pico 2 W)".format(APP_VERSION)
 
-TEMP_FILE = "picoware/micro_browser/page.tmp"
-CACHE_DIR = "picoware/micro_browser/cache"
-CACHE_INDEX_FILE = "picoware/micro_browser/cache.json"
-BOOKMARKS_FILE = "picoware/micro_browser/bookmarks.json"
+TEMP_FILE = "picoware/browser.tmp"
+CACHE_DIR = "picoware/browser_cache"
+CACHE_INDEX_FILE = "picoware/browser_cache.json"
+CUSTOM_FEEDS_FILE = "picoware/browser_feeds.json"
 
-MAX_PAGE_BYTES = 512 * 1024
-MAX_BLOCKS = 1400
-MAX_LINKS = 180
-MAX_TEXT_CHARS = 76000
-MAX_BOOKMARKS = 30
+MAX_PAGE_BYTES = 2 * 1024 * 1024
+MAX_BLOCKS = 600
+MAX_LINKS = 120
+MAX_TEXT_CHARS = 36000
 MAX_CACHE_FILES = 4
+MAX_CACHE_PAGE_BYTES = 256 * 1024
 READ_CHUNK_SIZE = 1024
+MAX_TAG_CHARS = 512
+MAX_TEXT_NODE_CHARS = 2048
+MAX_FEED_ITEMS = 40
+MAX_FEED_SUMMARY_CHARS = 600
+MAX_CUSTOM_FEEDS = 30
 
 TEXT_MARGIN = 6
 HEADER_HEIGHT = 18
@@ -30,3 +35,18 @@ HTTP_HEADERS = {
     "Accept-Encoding": "identity",
     "Connection": "close",
 }
+
+SEARCH_URL = "https://lite.duckduckgo.com/lite/?q={}"
+
+START_FEEDS = (
+    ("BBC Europe", "https://feeds.bbci.co.uk/news/world/europe/rss.xml"),
+    ("DW Europe", "https://rss.dw.com/rdf/rss-en-eu"),
+    ("Euronews Europe", "https://www.euronews.com/rss?level=vertical&name=my-europe"),
+    ("POLITICO Europe", "https://www.politico.eu/feed/"),
+    ("DER SPIEGEL", "https://www.spiegel.de/schlagzeilen/index.rss"),
+    ("France 24 Europe", "https://www.france24.com/en/europe/rss"),
+    ("G4Media Romania", "https://www.g4media.ro/feed"),
+    ("HotNews Romania", "https://hotnews.ro/feed"),
+    ("Digi24 Romania", "https://www.digi24.ro/rss"),
+    ("Biziday Romania", "https://www.biziday.ro/feed/"),
+)

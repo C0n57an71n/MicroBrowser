@@ -41,6 +41,9 @@ def resolve_url(base, href):
     if not href or href.startswith("#"):
         return base
 
+    if href.startswith("?"):
+        return base.split("?", 1)[0].split("#", 1)[0] + href
+
     if href.startswith("http://") or href.startswith("https://"):
         return href
 
@@ -62,3 +65,24 @@ def resolve_url(base, href):
         authority,
         normalize_path(directory + "/" + href)
     )
+
+
+def decode_query_value(value):
+    """Decode one percent-encoded query value without allocating large tables."""
+    out=bytearray(); index=0
+    while index<len(value):
+        if value[index]=="%" and index+2<len(value):
+            try: out.append(int(value[index+1:index+3],16)); index+=3; continue
+            except Exception: pass
+        out.append(32 if value[index]=="+" else ord(value[index])); index+=1
+    try: return out.decode("utf-8")
+    except Exception: return "".join(chr(byte) if byte<128 else "?" for byte in out)
+
+
+def unwrap_search_redirect(url):
+    """Open DuckDuckGo results directly instead of visiting its redirector."""
+    if "duckduckgo.com/l/?" not in url: return url
+    query=url.split("?",1)[1]
+    for part in query.split("&"):
+        if part.startswith("uddg="): return decode_query_value(part[5:])
+    return url

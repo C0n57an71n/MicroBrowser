@@ -20,11 +20,13 @@ Open MicroBrowser from the application list.
 
 Controls
 --------
+The main menu contains **SEARCH THE WEB**, **URL SEARCH**, and **RSS**.
+URL SEARCH automatically opens a site's advertised RSS/Atom feed when one is available.
+The RSS menu provides the feed list and options to add, rename, or remove feeds.
+
 **Up/Down** --> Scroll            
 **Left/Right** --> Select previous/next link               
 **Enter** --> Open selected link          
 **Enter** with no selected link --> URL text input     
-**Back**/**Esc** --> Previous page, or exit when history is empty      
+**Back**/**Esc** --> Previous article, page, or parent menu
 **Shift** & **Tab**/**Home** --> exit the app & return to the main menu     
-**F** --> find word in text        
-**S** --> save Bookmark
