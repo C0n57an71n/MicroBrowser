@@ -8,7 +8,7 @@ from urltools import resolve_url, unwrap_search_redirect
 from browser_store import PageCache, FeedStore
 
 STATE_VIEW=const(0); STATE_KEYBOARD=const(1); STATE_LOADING=const(2); STATE_START_MENU=const(3); STATE_RSS_MENU=const(4); STATE_FEED_LIST=const(5); STATE_MODIFY_MENU=const(6); STATE_ITEM_MENU=const(7); STATE_CONFIRM=const(8)
-PURPOSE_URL=const(0); PURPOSE_SEARCH=const(1); PURPOSE_FEED_NAME=const(2); PURPOSE_FEED_URL=const(3); PURPOSE_RENAME=const(4)
+PURPOSE_URL=const(0); PURPOSE_SEARCH=const(1); PURPOSE_FEED_NAME=const(2); PURPOSE_FEED_URL=const(3); PURPOSE_EDIT_NAME=const(4); PURPOSE_EDIT_URL=const(5)
 STYLE_NORMAL=const(0); STYLE_H1=const(1); STYLE_H2=const(2); STYLE_QUOTE=const(3); STYLE_RULE=const(4)
 
 _HTTP_PATCHED=False
@@ -93,7 +93,7 @@ class MicroBrowserApp:
         self._show_menu("RSS FEED LIST",items,STATE_FEED_LIST)
 
     def _show_modify_menu(self):
-        self._show_menu("MODIFY RSS LIST",[("ADD","add"),("RENAME","rename"),("REMOVE","remove")],STATE_MODIFY_MENU)
+        self._show_menu("MODIFY RSS LIST",[("ADD","add"),("EDIT","edit"),("REMOVE","remove")],STATE_MODIFY_MENU)
 
     def _show_item_menu(self,action):
         items=[]
@@ -137,7 +137,7 @@ class MicroBrowserApp:
                 else: self._show_item_menu(value)
             elif self.state==STATE_ITEM_MENU:
                 action,item_index=value
-                if action=="rename": self.edit_index=item_index; self._start_keyboard(PURPOSE_RENAME,STATE_ITEM_MENU,self.feeds.items[item_index][0])
+                if action=="edit": self.edit_index=item_index; self._start_keyboard(PURPOSE_EDIT_NAME,STATE_ITEM_MENU,self.feeds.items[item_index][0])
                 else: self._show_confirm(item_index)
             elif self.state==STATE_CONFIRM:
                 if value=="yes":
@@ -181,7 +181,7 @@ class MicroBrowserApp:
             try: self.http.close()
             except Exception: pass
         self._release_page()
-        self.http=HTTP(thread_manager=self.vm.thread_manager); self.loading=Loading(self.vm.draw); self.loading.set_text("Loading...")
+        self.http=HTTP(thread_manager=self.vm.thread_manager); self.loading=Loading(self.vm.draw,self.vm.foreground_color,self.vm.background_color); self.loading.set_text("Loading...")
         self.pending_url=url; self.pending_add_history=add_history; self.source_path=TEMP_FILE; self.www_retry=www_retry; self.discover_feed=discover_feed
         storage=self.vm.storage
         try:
@@ -277,20 +277,19 @@ class MicroBrowserApp:
             inp.reset(); raise ParseCancelled()
 
     def draw(self):
-        from picoware.system.vector import Vector
         draw=self.vm.draw; draw.fill_screen(self.vm.background_color)
         title=self.page.title if self.page else "MicroBrowser"
-        if len(title)>38: title=title[:35]+"..."
-        draw.text(Vector(TEXT_MARGIN,2),title,self.vm.foreground_color)
+        if len(title)>draw.scale_x(38): title=title[:draw.scale_x(35)]+"..."
+        draw._text(TEXT_MARGIN,2,title,self.vm.foreground_color)
         font=draw.get_font(0); line_height=font.height+LINE_GAP; y=HEADER_HEIGHT; visible=self._visible_count(); end=min(len(self.lines),self.top_line+visible)
         for index in range(self.top_line,end):
             selected=self.selected_link>0 and self.line_links[index]==self.selected_link
             style=self.line_styles[index]
             color=self.vm.selected_color if selected else (self.vm.foreground_color)
-            draw.text(Vector(TEXT_MARGIN,y),self.lines[index],color); y += line_height
+            draw._text(TEXT_MARGIN,y,self.lines[index],color); y += line_height
         footer="{}/{} L{}/{}".format(min(self.top_line+1,max(1,len(self.lines))),max(1,len(self.lines)),self.selected_link,len(self.page.links) if self.page else 0)
         if self.page and self.page.truncated: footer="TRUNC "+footer
-        draw.text(Vector(TEXT_MARGIN,draw.size.y-FOOTER_HEIGHT),footer[:42],self.vm.foreground_color); draw.swap()
+        draw._text(TEXT_MARGIN,draw.size.y-FOOTER_HEIGHT,footer[:draw.scale_x(42)],self.vm.foreground_color); draw.swap()
 
     def _layout(self):
         draw=self.vm.draw; width=max(12,(draw.size.x-(TEXT_MARGIN*2))//max(1,draw.len("M")))
@@ -357,7 +356,8 @@ class MicroBrowserApp:
         if purpose==PURPOSE_SEARCH: keyboard.title="Search the web"
         elif purpose==PURPOSE_FEED_NAME: keyboard.title="RSS feed name"
         elif purpose==PURPOSE_FEED_URL: keyboard.title="RSS feed URL"
-        elif purpose==PURPOSE_RENAME: keyboard.title="Rename RSS feed"
+        elif purpose==PURPOSE_EDIT_NAME: keyboard.title="Edit RSS name"
+        elif purpose==PURPOSE_EDIT_URL: keyboard.title="Edit RSS URL"
         else: keyboard.title="Enter URL"
         keyboard.response=self.current_url if initial is None else initial
         keyboard.run(force=True); keyboard.run(force=True); self.state=STATE_KEYBOARD
@@ -378,10 +378,16 @@ class MicroBrowserApp:
                 if value and self.feeds and self.feeds.add(self.pending_feed_name,value): self.vm.alert("RSS feed saved",False)
                 elif value: self.vm.alert("Could not save feed",False)
                 self.pending_feed_name=""; self._show_modify_menu()
-            elif self.keyboard_purpose==PURPOSE_RENAME:
-                if value and self.feeds.rename(self.edit_index,value): self.vm.alert("RSS feed renamed",False)
-                elif value: self.vm.alert("Could not rename feed",False)
-                self._show_modify_menu()
+            elif self.keyboard_purpose==PURPOSE_EDIT_NAME:
+                if value and self.feeds and 0<=self.edit_index<len(self.feeds.items):
+                    self.pending_feed_name=value
+                    self._start_keyboard(PURPOSE_EDIT_URL,STATE_ITEM_MENU,self.feeds.items[self.edit_index][1])
+                else:
+                    self.pending_feed_name=""; self.edit_index=-1; self._show_modify_menu()
+            elif self.keyboard_purpose==PURPOSE_EDIT_URL:
+                if value and self.feeds and self.feeds.edit(self.edit_index,self.pending_feed_name,value): self.vm.alert("RSS feed updated",False)
+                elif value: self.vm.alert("Could not update feed",False)
+                self.pending_feed_name=""; self.edit_index=-1; self._show_modify_menu()
             elif value:
                 self.return_menu="main"; self.history=[]; self.menu=None
                 known=self._known_feed_for(value)
@@ -391,6 +397,7 @@ class MicroBrowserApp:
             return
         if not keyboard.run():
             keyboard.reset()
+            if self.keyboard_purpose in (PURPOSE_EDIT_NAME,PURPOSE_EDIT_URL): self.pending_feed_name=""; self.edit_index=-1
             if self.keyboard_return_state==STATE_START_MENU: self._show_start_menu()
             elif self.keyboard_return_state in (STATE_MODIFY_MENU,STATE_ITEM_MENU): self._show_modify_menu()
             else: self.state=STATE_VIEW; self.draw()
