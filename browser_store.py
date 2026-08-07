@@ -101,11 +101,17 @@ class FeedStore:
         if index<0 or index>=len(self.items): return False
         del self.items[index]; return self._save()
 
-    def rename(self,index,name):
-        name=name.strip()
-        if index<0 or index>=len(self.items) or not name: return False
-        self.items[index][0]=name[:40]
-        return self._save()
+    def edit(self,index,name,url):
+        name=name.strip(); url=url.strip()
+        if index<0 or index>=len(self.items) or not name or not url: return False
+        if "://" not in url: url="https://"+url
+        for item_index,item in enumerate(self.items):
+            if item_index!=index and item[1]==url: return False
+        previous=self.items[index]
+        self.items[index]=[name[:40],url]
+        if self._save(): return True
+        self.items[index]=previous
+        return False
 
     def _load(self):
         try:
