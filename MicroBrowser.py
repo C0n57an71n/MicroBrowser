@@ -15,19 +15,20 @@ def _add_app_path():
     )
 
     for path in candidates:
-        try:
-            import os
-            os.stat(path + "/micro_browser_app.py")
+        for filename in ("micro_browser_app.mpy", "micro_browser_app.py"):
+            try:
+                import os
+                os.stat(path + "/" + filename)
 
-            if path not in sys.path:
-                sys.path.insert(0, path)
+                if path not in sys.path:
+                    sys.path.insert(0, path)
 
-            return path
-        except OSError:
-            pass
+                return path
+            except OSError:
+                pass
 
     raise ImportError(
-        "micro_browser_app.py not found in "
+        "micro_browser_app module not found in "
         "/sd/picoware/micro_browser"
     )
 
